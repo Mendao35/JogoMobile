@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+
+
 public class PlayerController : Singleton<PlayerController>
 {
     [Header("Lerp")]
@@ -11,6 +13,9 @@ public class PlayerController : Singleton<PlayerController>
 
     [Header("Coin Setup")]
     public GameObject coinCollector;
+
+    [Header("Animation")]
+    public AnimatorManager animatorManager;
     
     public float speed = 1f;
 
@@ -28,6 +33,7 @@ public class PlayerController : Singleton<PlayerController>
 
     private float _currentSpeed;
     private Vector3 _startPosition;
+    private float _baseSpeedToAnimation = 5;
 
     private void Start()
     {
@@ -56,7 +62,8 @@ public class PlayerController : Singleton<PlayerController>
         {
             if(!invencible)
             {
-                EndGame();
+                MoveBack();
+                EndGame(AnimatorManager.AnimationType.DEATH);
             }
         }
     }
@@ -73,15 +80,22 @@ public class PlayerController : Singleton<PlayerController>
         }
     }
 
-    private void EndGame()
+    private void MoveBack()
+    {
+        this.transform.position -= transform.forward * 0.5f;
+    }
+
+    private void EndGame(AnimatorManager.AnimationType animationType = AnimatorManager.AnimationType.IDLE)//Se eu nao passar nada sera Idle
     {
         _canRun = false;
         endScreen.SetActive(true);
+        animatorManager.Play(animationType);
     }
 
     public void StartToRun()
     {
         _canRun = true;
+        animatorManager.Play(AnimatorManager.AnimationType.RUN,_currentSpeed / _baseSpeedToAnimation);
     }
 
     public void SetPowerUpText(string s)
