@@ -28,6 +28,8 @@ public class PlayerController : Singleton<PlayerController>
 
     public bool invencible = false;
 
+    public BounceHelper2 bounceHelper2;
+
     private bool _canRun;
     private Vector3 _pos;
 
@@ -39,6 +41,15 @@ public class PlayerController : Singleton<PlayerController>
     {
         _startPosition = transform.position;
         ResetSpeed();
+    }
+
+    public void Bounce()
+    {
+        if(bounceHelper2 != null)
+        {
+            bounceHelper2.StartBounce();
+        }
+        
     }
 
 

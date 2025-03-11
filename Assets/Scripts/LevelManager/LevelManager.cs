@@ -1,17 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class LevelManager : MonoBehaviour
 {
     public Transform container;
 
     //public GameObject level;
-    public List<GameObject> levels;
-
-    
+    public List<GameObject> levels;    
  
-    /* SCRIPTABLE OBJECT
+    /* SCRIPTABLE OBJECT QUE ESTA PASSADNO ESSAS VARIAVEIS
     [Header("Levels Peaces")]
     public List<LevelPeaceBase> levelPeacesList;
     public List<LevelPeaceBase> levelPeacesStartList;
@@ -29,6 +28,12 @@ public class LevelManager : MonoBehaviour
 
     private List<LevelPeaceBase> _spawnedPeacesList = new List<LevelPeaceBase>();
     private LevelPeaceBaseSetup _currSetup;
+
+    [Header("Sacle")]
+    public float scaleDuration = .2f;
+    public float scaleTimeBetweenPeaces = .1f;
+    public float scaleFactor = 1.2f; //Tamanho maximo antes de voltar ao normal
+   // public Ease ease = Ease.OutBack;
 
 
     private void Awake()
@@ -93,7 +98,54 @@ public class LevelManager : MonoBehaviour
             CreatePeaces(_currSetup.levelPeacesEndtList);            
         }
 
-        ColorManager.Instance.ChangeColorByType(_currSetup.artType);
+        //ColorManager.Instance.ChangeColorByType(_currSetup.artType);
+
+        StartCoroutine(ScalePeacesByTime());
+    }
+
+    IEnumerator ScalePeacesByTime()
+    {
+        foreach(var p in _spawnedPeacesList) //Percorre todos os itens da lista
+        {
+            p.transform.localScale = Vector3.one; //Bota as escalas dos itens pra 1
+        }
+
+        yield return null;
+
+        for(int i = 0; i < _spawnedPeacesList.Count; i++)
+        {
+            StartCoroutine(AnimateScale(_spawnedPeacesList[i].transform, scaleDuration, scaleFactor));
+            yield return new WaitForSeconds(scaleTimeBetweenPeaces);
+            //_spawnedPeacesList[i].transform.DOScale(1, scaleDuration).SetEase(ease);
+            //yield return new WaitForSeconds(timeBetweenPeaces);
+        }
+    }
+
+    IEnumerator AnimateScale(Transform obj, float duration, float maxScale)
+    {
+        float elapsedTime = 0f;
+        Vector3 initialScale = Vector3.one;
+        Vector3 peakScale = Vector3.one * maxScale;
+
+        // Fase de crescimento
+        while (elapsedTime < duration / 2)
+        {
+            elapsedTime += Time.deltaTime;
+            obj.localScale = Vector3.Lerp(initialScale, peakScale, (elapsedTime / (duration / 2)));
+            yield return null;
+        }
+
+        elapsedTime = 0f;
+
+        // Fase de retorno ao tamanho normal
+        while (elapsedTime < duration / 2)
+        {
+            elapsedTime += Time.deltaTime;
+            obj.localScale = Vector3.Lerp(peakScale, initialScale, (elapsedTime / (duration / 2)));
+            yield return null;
+        }
+
+        obj.localScale = initialScale; // Garante o tamanho final correto
     }
 
     private void CreatePeaces(List<LevelPeaceBase> list)
