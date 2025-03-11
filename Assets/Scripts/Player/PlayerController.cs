@@ -16,7 +16,13 @@ public class PlayerController : Singleton<PlayerController>
 
     [Header("Animation")]
     public AnimatorManager animatorManager;
-    
+
+    [Header("Skull")]
+    public ParticleSystem particleSkull;
+
+    [Header("Limits")]
+    public float limit = 4;
+
     public float speed = 1f;
 
     public string tagToCompareEnemy = "Enemy";
@@ -63,6 +69,15 @@ public class PlayerController : Singleton<PlayerController>
         _pos.y = transform.position.y;
         _pos.z = transform.position.z;
 
+        /*if(_pos.x < -limit)
+        {
+            _pos.x = -limit;
+        }
+        else if(_pos.x > limit)
+        {
+            _pos.x = limit;
+        }*/
+
         transform.position = Vector3.Lerp(transform.position, _pos, lerpSpeed * Time.deltaTime);
         transform.Translate(transform.forward * _currentSpeed * Time.deltaTime);
     }
@@ -101,6 +116,10 @@ public class PlayerController : Singleton<PlayerController>
         _canRun = false;
         endScreen.SetActive(true);
         animatorManager.Play(animationType);
+        if(particleSkull != null)
+        {
+            particleSkull.Play();
+        }
     }
 
     public void StartToRun()
